@@ -35,14 +35,14 @@ export class DataTable {
         }
     }
 
-    public delete(key: u64) {
+    public delete(key: u64):void {
         if (this.get(key) != null) {
             let itr = db_find_i64(this.code, this.receiver, this.table, key);
             db_remove_i64(itr);
         }
     }
 
-    public remove(key: u64) {
+    public remove(key: u64):void {
         this.delete(key);
     }
 }

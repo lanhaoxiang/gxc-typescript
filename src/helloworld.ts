@@ -1,7 +1,7 @@
 import {get_action_asset_amount, get_action_asset_id, get_trx_sender, printi, withdraw_asset} from "../lib/env";
 import {Contract} from "../lib/contract";
 import {assert, N, string2cstr} from "../lib/utils";
-import {Create} from "./models";
+import {Book, Create} from "./models";
 
 class HelloWorld extends Contract {
     create(args: Create): void {
@@ -23,9 +23,10 @@ class HelloWorld extends Contract {
 
         //test storage create/delete/query/modify
         //db_store_i64(scope : u64, table : u64, payer: u64, id : u64,  data : u32, len : u32) : i32;
-        let buffer_address = string2cstr("my first book");
+        // let buffer_address = string2cstr("my first book");
         let dt = this.getTable('book');
-        dt.set("mybook", );
+        let book = new Book("my first book");
+        dt.set("mybook", book.toStream());
         // let book_idx_1 = db_store_i64(this.receiver, N("book"), 0, this.receiver, buffer_address, 13);//TODO FIXME get_table_objects failed
     }
 

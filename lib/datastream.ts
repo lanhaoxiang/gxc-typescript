@@ -11,13 +11,13 @@ export class DataStream {
     end: usize;
 
 
-    constructor(start: usize, length: u32) {
+    constructor(start: usize, length: i32) {
         this.start = start;
         this.pos = start;
         this.end = start + length;
     }
 
-    public length(): u32 {
+    public length(): i32 {
         return <u32>(this.pos - this.start);
     }
 

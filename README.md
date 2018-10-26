@@ -8,3 +8,10 @@ Current features:
 - Read and Inserts in tables
 - Using same abi file between c ++ and TypeScript
 
+## Getting started
+
+``` bash
+https://github.com/lanhaoxiang/gxc-typescript.git
+cd gxc-typescript
+npm install
+```

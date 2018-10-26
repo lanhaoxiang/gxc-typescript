@@ -27,5 +27,8 @@
   "homepage": "https://github.com/lanhaoxiang/gxc-typescript#readme",
   "devDependencies": {
     "assemblyscript": "github:gxchain/assemblyscript"
+  },
+  "scripts": {
+    "build": "asc ./src/helloworld.ts -o ./dist/helloworld.wast --optimize --validate --binaryFile ./dist/helloworld.wasm"
   }
 }

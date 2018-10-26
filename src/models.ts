@@ -1,4 +1,5 @@
 import {DataStream} from "../lib/datastream"
+import {toUTF8Array} from "../lib/utils";
 
 export class Step {
 
@@ -24,6 +25,25 @@ export class Step {
     }
 }
 
+export class Book {
+    title: string;
+
+    constructor(title: string) {
+        this.title = title;
+    }
+
+    public static fromStream(ds: DataStream): Book {
+        return new Book(ds.readString());
+    }
+
+    public toStream(): DataStream {
+        // let ptr:usize = this.title.toUTF8();
+        // let length:i32 = this.title.lengthUTF8;
+        let arr = new UTF8Array(0);
+        let ds = new DataStream()
+    }
+}
+
 export class Create {
 
     user: u64;
@@ -42,33 +62,5 @@ export class Create {
 
     static fromStream(ds: DataStream): Create {
         return new Create(ds.read <u64>(), ds.read<u64>(), ds.read<u32>(), ds.read<u32>(), ds.read<u32>());
-    }
-}
-
-export class Remove {
-
-    user: u64;
-    game: u64;
-
-    constructor(user: u64, game: u64) {
-        this.user = user;
-        this.game = game;
-    }
-
-    static fromStream(ds: DataStream): Remove {
-        return new Step(ds.read <u64>(), ds.read<u64>());
-    }
-}
-
-export class RemoveAll {
-
-    user: u64;
-
-    constructor(user: u64) {
-        this.user = user;
-    }
-
-    static fromStream(ds: DataStream): RemoveAll {
-        return new RemoveAll(ds.read <u64>());
     }
 }

@@ -20,7 +20,7 @@ export class Contract {
         return ds;
     }
 
-    getTable(tableName: string) {
+    getTable(tableName: string):DataTable {
         return new DataTable(tableName, this.receiver, this.code);
     }
 
