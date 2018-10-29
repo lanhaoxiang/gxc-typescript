@@ -26,7 +26,7 @@ class HelloWorld extends Contract {
         // let buffer_address = string2cstr("my first book");
         let dt = this.getTable('book');
         let book = new Book("my first book");
-        dt.set("mybook", book.toStream());
+        dt.set(N("mybook"), book.toStream());
         // let book_idx_1 = db_store_i64(this.receiver, N("book"), 0, this.receiver, buffer_address, 13);//TODO FIXME get_table_objects failed
     }
 
