@@ -1,5 +1,4 @@
 import {DataStream} from "../lib/datastream"
-import {toUTF8Array} from "../lib/utils";
 
 export class Step {
 

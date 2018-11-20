@@ -1,6 +1,4 @@
-import {DataStream} from "../../lib/datastream";
-
-class Step {
+interface Step {
     name: string;
     age: i32;
     sex:bool;

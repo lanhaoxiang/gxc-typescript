@@ -79,7 +79,7 @@ export class DataStream {
     }
 
     writeString(s: string): void {
-        this.writeVarInt32(s.lengthUTF8() - 1);//not sure about the minus 1 yet
+        this.writeVarInt32(s.lengthUTF8 - 1);//not sure about the minus 1 yet
         if (s == "") return;
         copy_memory(this.pos, s.toUTF8(), s.lengthUTF8);
     }
