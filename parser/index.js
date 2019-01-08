@@ -16,9 +16,7 @@ let fields = modelFile.match(/\{(.|\s)*\}/g)[0].replace(/\{|\}/g, '')
         };
     });
 
-// console.log(className, fields);
-
-let result = [`class ${className} {`];
+let output = [`class ${className} {`];
 
 const util = {
     isArray(type) {
@@ -60,7 +58,7 @@ const toStreamGenerator = (fields, className) => {
         `    let ds = new DataStream(<usize>arr.buffer, len)`
     ];
     fields.forEach(f => {
-        return statements.push(`    ds.write<${f.type}>(this.${f.name});`);
+        statements.push(`    ds.write<${f.type}>(this.${f.name});`);
     });
     statements.push(`    return ds;\n`);
     return `  public toStream():DataStream{\n${statements.join('\n')}  }`;
@@ -74,10 +72,10 @@ const sizeGenerator = (fields) => {
         statements.push(`    size+=sizeof<${f.type}>();`);
     });
     statements.push(`    return size;\n`);
-    return `  public static size():u32{\n${statements.join('\n')}  }`;
+    return [`  public static size():u32{\n${statements.join('\n')}  }`,`  public size():u32{\n${statements.join('\n')}  }`].join('\n');
 };
 
-console.log(result.concat(filedsGenertator(fields))
+console.log(output.concat(filedsGenertator(fields))
     .concat(constructorGenerator(fields))
     .concat(fromStreamGenerator(fields, className))
     .concat(toStreamGenerator(fields, className))

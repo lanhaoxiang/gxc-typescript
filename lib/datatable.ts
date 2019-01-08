@@ -26,12 +26,12 @@ export class DataTable {
         }
     }
 
-    public set(key: u64, item: DataStream): i32 {
+    public set(key: u64, item: DataStream): void {
         if (this.get(key) == null) {
-            return db_store_i64(this.receiver, this.table, this.receiver, key, item.start, item.length());
+            db_store_i64(this.receiver, this.table, this.receiver, key, item.buffer, item.len);
         } else {
             let itr = db_find_i64(this.code, this.receiver, this.table, key);
-            return db_update_i64(itr, this.receiver, item.start, item.length());
+            db_update_i64(itr, this.receiver, item.buffer, item.len);
         }
     }
 

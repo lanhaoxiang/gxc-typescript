@@ -35,11 +35,9 @@ export class Book {
         return new Book(ds.readString());
     }
 
-    public toStream(): DataStream {
-        // let ptr:usize = this.title.toUTF8();
-        // let length:i32 = this.title.lengthUTF8;
-        let arr = new UTF8Array(0);
-        let ds = new DataStream()
+    public toStream():DataStream{
+        let buffer = new Uint8Array();
+        return new DataStream();
     }
 }
 

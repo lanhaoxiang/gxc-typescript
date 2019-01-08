@@ -1,172 +1,110 @@
-//Documentation: https://github.com/EOSIO/eos/blob/48ee386b3ab91b00fbe5342314a7d3ae5fd9bdc2/contracts/eosiolib/datastream.hpp
-//Class stuff: https://github.com/EOSIO/eos/blob/48ee386b3ab91b00fbe5342314a7d3ae5fd9bdc2/contracts/eosiolib/datastream.hpp#L459
-//Parts of this class are inspired by eosargentina, thank you.
+// Credits to EOSArgentina
+// https://github.com/EOSArgentina/eostypescript
 
-import "allocator/arena";
-import {allocateUnsafe, HEADER_SIZE} from "~lib/internal/string";
+import {
+    HEADER_SIZE,
+    allocateUnsafe,
+} from "~lib/internal/string";
+import { printstr } from "./utils";
 
 export class DataStream {
-    start: usize;
-    pos: usize;
-    end: usize;
 
+    protected _pos: u32 = 0
 
-    constructor(start: usize, length: i32) {
-        this.start = start;
-        this.pos = start;
-        this.end = start + length;
+    constructor(
+        public buffer: u32,
+        public len:    u32
+    ) {}
+
+    get currentPos(): u32 {
+        return this._pos;
     }
 
-    public length(): i32 {
-        return <u32>(this.pos - this.start);
+    skip(value: u32): void {
+        this._pos += value;
     }
 
-    /**
-     *  Skips a specified number of bytes from this stream
-     *  @brief Skips a specific number of bytes from this stream
-     *  @param s The number of bytes to skip
-     */
-    skip(s: usize): void {
-        this.pos += s;
+    length():u32{
+        return this.len;
     }
 
-    readToDest(destptr: usize, len: usize): void {
-        //eosio_assert( size_t(_end - _pos) >= (size_t)s, "read" );
-        copy_memory(this.pos, destptr, len);
-        this.pos += len;
-    }
-
-    readVarInt32(): u32 {
-        let value: u32 = 0;
-        let shift: u32 = 0;
-        let b: u8 = 0;
+    readVarint32(): u32 {
+        var value: u32 = 0;
+        var shift: u32 = 0;
         do {
-            b = this.read<u8>();
+            var b = this.read<u8>();
             value |= <u32>(b & 0x7f) << (7 * shift++);
         } while (b & 0x80);
         return value;
     }
 
-    writeVarInt32(value: u32): void {
+    writeVarint32(value : u32): void {
         do {
-            let b: u8 = <u8>value & <u8>0x7f;
+            let b : u8  = <u8>value & <u8>0x7f;
             value >>= 7;
             b |= ((value > 0 ? 1 : 0) << 7);
-            this.write<u8>(b);
-        } while (value);
+            this.store<u8>(b);
+        } while( value );
     }
 
-    //should probably replace this to u8 write
-    write<T>(val: T): void {
-        //eosio_assert( _pos < _end, "put" );
-        store<T>(this.pos, val);
-        this.pos += sizeof<T>();
+    store<T>(value : T) : void {
+        store<T>(this.buffer + this._pos, value);
+        this._pos += sizeof<T>();
     }
 
-    read<T>(): T {
-        let value: T = load<T>(this.pos);
-        this.pos += sizeof<T>();
+    read<T>() : T {
+        var value : T = load<T>(this.buffer + this._pos);
+        this._pos += sizeof<T>();
         return value;
     }
 
+    readVector<T>() : T[] {
+        var len = this.readVarint32();
+        if( len == 0 ) return <T[]>[];
 
-    writeBool(b: bool): void {
-        this.write<u8>(<u8>b);
-    }
-
-    readBool(): bool {
-        return this.read<u8>() != 0;
-    }
-
-    writeString(s: string): void {
-        this.writeVarInt32(s.lengthUTF8 - 1);//not sure about the minus 1 yet
-        if (s == "") return;
-        copy_memory(this.pos, s.toUTF8(), s.lengthUTF8);
-    }
-
-    readString(): string {
-        let len: u32 = this.readVarInt32();
-        //let len: u32 = this.read<u32>();
-        if (len == 0) return "";
-        let s = allocateUnsafe(len);
-        for (let i: u32 = 0; i < len; i++) {
-            let b: u16 = this.read<u8>();
-            store<u16>(<usize>s + 2 * i, b, HEADER_SIZE);
+        var arr = new Array<T>(len);
+        for(let i : u32 = 0; i < len; i++) {
+            arr[i] = read<T>();
         }
-        return s;
-    }
 
-    //Does this work with nonprimitives?
-    //May need arr to be T?
-    writeVector<T>(arr: T[]): void {
-        this.writeVarInt32(arr.length);
-        this.writeArray(arr);
-    }
-
-    //Don't think this works with non primitives though
-    //May need to return T?
-    readVector<T>(): T[] {
-        let len = this.readVarInt32();
-        return this.readArray<T>(len);
-    }
-
-    readArray<T>(len: u32): T[] {
-        if (len == 0) return new Array<T>();
-        let arr = new Array<T>(len);
-        for (let i: u32 = 0; i < len; i++) {
-            arr[i] = this.read<T>();
-        }
         return arr;
     }
 
-    writeArray<T>(arr: T[]): void {
-        for (let i: u32 = 0; i < arr.length; i++)
-            this.write<T>(arr[i]);
+    readString() : string {
+        var len = this.readVarint32();
+        if(len == 0) return "";
+        let s = allocateUnsafe(len);
+
+        var i: u32 = 0;
+        while(i < len) {
+            let b : u16 = this.read<u8>();
+            store<u16>(<usize>s + (i << 1), b, HEADER_SIZE);
+            i++;
+        }
+
+        return <string>s;
     }
 
-    //todo:
-    // writeObject<T>(obj: T): void {
-    //     for (let i: u32 = 0; i < Object.values(obj).length; i++) {
-    //
-    //     }
-    // }
+    writeString(str : string) : void {
+        var len : i32 = str.length;
+        this.writeVarint32(len);
+        if(len == 0) return;
 
-    //todo:
-    //different signature than other reads, perhaps change it
-    // readObject<T>(obj: T): void {
-    //     let vals = Object.values(obj);
-    //     for (let i: u32 = 0; i < vals.length; i++) {
-    //         obj[i] = vals[i];
-    //     }
-    // }
+        var ptr = str.toUTF8();
+        len = str.lengthUTF8 - 1;
 
-    //The AssemblyScript map implementation is too bad for now: https://github.com/AssemblyScript/assemblyscript/blob/master/std/assembly/map.ts
-    /*function writeMap<K, V>(m: Map<K, V>): void{
-    *	this.writeVarint32(m.size());
-    *	for(key as m.__keys){
-    *		this.write<K>(key);
-    *		this.write<V>(m.get(key));
-    *	}
-    *
-    *}
-    *
-    *function readMap<K, V>(): Map<K,V> {
-    *	let m = new Map<K, V>();
-    *	let len = this.readVarint32();
-    *	for(var i: u32; i < len; i++){
-    *		m.set(this.read<K>(), this.read<V>());//Not sure if read<K> is guaranteed to execute first here
-    *	}
-    *}
-    */
-    //TODO: Sets
-    //TODO: Flat_sets
-    //TODO: Flat_maps
-    //TODO: Tuples
-    //TODO: Class instances https://github.com/EOSIO/eos/blob/48ee386b3ab91b00fbe5342314a7d3ae5fd9bdc2/contracts/eosiolib/datastream.hpp#L459
-    //TODO: Interface instances?
-    //TODO: Checksum160
-    //TODO: Checksum512
-    //TODO: Pubkey
-    //TODO: key256
-    //TODO: Checksum256
-}
+        move_memory(this.buffer + this._pos, <usize>ptr, len);
+        this._pos += len;
+    }
+
+    writeData<T>(data : T) : void {
+        var len : u32 = data.size();
+        var ds = data.to_ds();
+        move_memory(this.buffer + this._pos, changetype<usize>(ds.buffer), len);
+        this._pos += len;
+    }
+
+    reset() : void {
+        this._pos = 0;
+    }
+};
