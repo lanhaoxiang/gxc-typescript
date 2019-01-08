@@ -94,7 +94,7 @@ export declare function abort(): void;
 
 export declare function graphene_assert(condition: i32, msg: i32): void;
 
-export declare function graphene_assert_message(condition: i32, msg: i32, len: i32): void;
+export declare function graphene_assert_message(condition: i32, msg: usize, len: i32): void;
 
 export declare function graphene_assert_code(condition: i32, error_code: i64): void;
 
