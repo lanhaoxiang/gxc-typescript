@@ -94,7 +94,7 @@ export declare function abort(): void;
 
 export declare function graphene_assert(condition: i32, msg: i32): void;
 
-export declare function graphene_assert_message(condition: i32, msg: i32, len: i32): void;
+export declare function graphene_assert_message(condition: i32, msg: usize, len: i32): void;
 
 export declare function graphene_assert_code(condition: i32, error_code: i64): void;
 
@@ -109,6 +109,8 @@ export declare function expiration(): u64;
 export declare function tapos_block_num(): i32;
 
 export declare function tapos_block_prefix(): u64;
+
+export declare function get_account_name_by_id(data: usize, len: u32, account_id: i64):i64;
 
 export declare function memcpy(dst: i32, src: i32, len: i32): i32;
 
