@@ -36,8 +36,8 @@ export class Book {
     }
 
     public toStream():DataStream{
-        let buffer = new Uint8Array();
-        return new DataStream();
+        let buffer = new Uint8Array(100);
+        return new DataStream((u32)(buffer.buffer),0);
     }
 }
 
